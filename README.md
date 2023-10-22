@@ -1,5 +1,9 @@
 # GDOWN CLI Golang
 
+Google DOWNloader
+
+This utility can be used to download all the files automatically from a google drive folder one at a time (alternative to manually clicking download on each file on google drive web UI).
+
 ## Setup
 
 ### Dev Setup
