@@ -22,6 +22,14 @@ Or provide them while running the application like this
 GOOGLE_OAUTH_CLIENT_ID={CLIENT_ID} GOOGLE_OAUTH_CLIENT_SECRET={CLIENT_SECRET} ./build/gdown
 ```
 
+> During the authentication process, paste the URL in browser and it'll generate redirect url with `authorization key`, paste the authorization key in the terminal to authenticate.
+>
+> redirect url: `http://localhost:8000/auth/google/callback?state=state-token&code=4%2F0AfJohXnfe9bYEgbx2xhRGm35swCYmPr3yWnNQ7Qwswv7l6ro8R2s2mPv1p5TSlF0vcfMdA&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly`
+> 
+> `code=4%2F0AfJohXnfe9bYEgbx2xhRGm35swCYmPr3yWnNQ7Qwswv7l6ro8R2s2mPv1p5TSlF0vcfMdA` This part contains the authorization key but it is browser encoded.
+> 
+> So the authorization key will be `4/0AfJohXnfe9bYEgbx2xhRGm35swCYmPr3yWnNQ7Qwswv7l6ro8R2s2mPv1p5TSlF0vcfMdA`, i.e. `%2F` translates to `/`
+
 ### Dev Setup
 
 Setup environment variables first
