@@ -19,8 +19,21 @@ func getClient(config *oauth2.Config) *http.Client {
 	tokenFile := "token.json"
 	token, err := getTokenFromFile(tokenFile)
 
+	if !token.Valid() {
+		log.Println("Token Expired.")
+	}
+
 	if err != nil {
+		log.Println("Could not read token from file")
+	}
+
+	// generate new token if token file does not exists
+	// or token got expired
+	if err != nil || !token.Valid() {
+		log.Println("Generating new token...")
 		token = getTokenFromWeb(config)
+
+		log.Println("Saving generated token to file")
 		saveToken(tokenFile, token)
 	}
 
@@ -74,10 +87,10 @@ func main() {
 
 	ctx := context.Background()
 
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Printf("Could not load .env file: %v\n", err)
-	}
+	_ = godotenv.Load()
+	// if err != nil {
+	// 	fmt.Printf("Could not load .env file: %v\n", err)
+	// }
 
 	CLIENT_ID := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	CLIENT_SECRET := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")

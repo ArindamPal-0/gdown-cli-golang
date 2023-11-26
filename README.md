@@ -54,9 +54,26 @@ go get github.com/joho/godotenv
 ## TODO
 
 - [ ] Google client authentication
+- [ ] Google service account authentication
 - [ ] Fetch file details
 - [ ] Fetch folder details and list of files
 - [ ] Download a file
 - [ ] Make it a cli application taking cli args
 - [ ] Download all the files in a folder
 - [ ] Download a folder recursively
+
+## Common Issues
+
+### WSL problem opening URL from terminal
+
+https://github.com/microsoft/WSL/issues/8892
+
+Installing `xdg-utils` and `wslu` fixes the issue.
+```shell
+sudo apt install xdg-utils
+sudo add-apt-repository ppa:wslutilities/wslu
+sudo apt update
+sudo apt install wslu
+```
+
+Opening of URL from terminal is handled by https://github.com/pkg/browser
