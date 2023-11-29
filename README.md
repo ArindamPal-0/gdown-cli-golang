@@ -6,6 +6,12 @@ This utility can be used to download all the files automatically from a google d
 
 ## Setup
 
+### Google Cloud Credentials
+
+Create a google cloud project and enable *google drive api*. After that create a new *Service Account* under *Create Credentials*. From the created Service Account, generate a new *Key* and select *Key Type* as JSON. After that credentials will be downloaded in a json file. Change it's name to `credentials.json` and put it in project directory or directory from where `gdown` will be run.
+
+### Build and Run Instruction
+
 Build
 ```shell
 go build -o build/gdown
@@ -15,29 +21,10 @@ Run
 ```shell
 ./build/gdown
 ```
-Make sure to run the executable from the directory containing .env file with the required env variables `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET`. 
-
-Or provide them while running the application like this
-```shell
-GOOGLE_OAUTH_CLIENT_ID={CLIENT_ID} GOOGLE_OAUTH_CLIENT_SECRET={CLIENT_SECRET} ./build/gdown
-```
-
-> During the authentication process, paste the URL in browser and it'll generate redirect url with `authorization key`, paste the authorization key in the terminal to authenticate.
->
-> redirect url: `http://localhost:8000/auth/google/callback?state=state-token&code=4%2F0AfJohXnfe9bYEgbx2xhRGm35swCYmPr3yWnNQ7Qwswv7l6ro8R2s2mPv1p5TSlF0vcfMdA&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly`
-> 
-> `code=4%2F0AfJohXnfe9bYEgbx2xhRGm35swCYmPr3yWnNQ7Qwswv7l6ro8R2s2mPv1p5TSlF0vcfMdA` This part contains the authorization key but it is browser encoded.
-> 
-> So the authorization key will be `4/0AfJohXnfe9bYEgbx2xhRGm35swCYmPr3yWnNQ7Qwswv7l6ro8R2s2mPv1p5TSlF0vcfMdA`, i.e. `%2F` translates to `/`
 
 ### Dev Setup
 
-Setup environment variables first
-```.env
-GOOGLE_OAUTH_CLIENT_ID = 
-GOOGLE_OAUTH_CLIENT_SECRET = 
-```
-
+Running the application
 ```shell
 go run gdown.go
 ```
@@ -54,7 +41,7 @@ go get github.com/joho/godotenv
 ## TODO
 
 - [ ] Google client authentication
-- [ ] Google service account authentication
+- [x] Google service account authentication
 - [ ] Fetch file details
 - [ ] Fetch folder details and list of files
 - [ ] Download a file
@@ -64,9 +51,9 @@ go get github.com/joho/godotenv
 
 ## Common Issues
 
-### WSL problem opening URL from terminal
+### WSL problem opening URL from terminal (used in google oauth2 login)
 
-https://github.com/microsoft/WSL/issues/8892
+[No method available for opening url - wsl github issue](https://github.com/microsoft/WSL/issues/8892)
 
 Installing `xdg-utils` and `wslu` fixes the issue.
 ```shell
@@ -76,4 +63,4 @@ sudo apt update
 sudo apt install wslu
 ```
 
-Opening of URL from terminal is handled by https://github.com/pkg/browser
+Opening of URL from terminal is handled by [browser package](https://github.com/pkg/browser)
