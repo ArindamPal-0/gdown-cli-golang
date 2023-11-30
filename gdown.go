@@ -121,12 +121,15 @@ func main() {
 		log.Fatalf("Unable to retrieve folder: %v", err)
 	}
 
+	/* Fetching Files List */
 	filesListRes, err := driveService.Files.List().Q(fmt.Sprintf("\"%s\" in parents", folderId)).Fields("files(id, name, mimeType, size)").OrderBy("name").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve file list: %v", err)
 	}
 
+	/* Constructing File and Folder lists */
 	filesList := []File{}
+	foldersList := []Folder{}
 	for _, file := range filesListRes.Files {
 		if file.MimeType != folderMimeType {
 			filesList = append(filesList, File{
@@ -135,13 +138,21 @@ func main() {
 				MimeType: file.MimeType,
 				Size:     file.Size,
 			})
+		} else {
+			foldersList = append(foldersList, Folder{
+				Id:      file.Id,
+				Name:    file.Name,
+				Folders: []Folder{},
+				Files:   []File{},
+			})
 		}
 	}
 
+	/* Creating Parent Folder Struct Object */
 	folder := Folder{
 		Id:      folderRes.Id,
 		Name:    folderRes.Name,
-		Folders: []Folder{},
+		Folders: foldersList,
 		Files:   filesList,
 	}
 
