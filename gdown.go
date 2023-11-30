@@ -105,10 +105,10 @@ func GetFolder(driveService *drive.Service, folderId string) (*Folder, error) {
 	}, nil
 }
 
-const downloadFolderPath = "downloads"
+const DownloadFolderPath = "downloads"
 
 /* Download a Single file */
-func DownloadFile(driveService *drive.Service, file *File) error {
+func DownloadFile(driveService *drive.Service, file *File, folderPath string) error {
 	/* Send Download File Request */
 	fileRes, err := driveService.Files.Get(file.Id).Download()
 	if err != nil {
@@ -117,13 +117,13 @@ func DownloadFile(driveService *drive.Service, file *File) error {
 	defer fileRes.Body.Close()
 
 	/* Create Folder */
-	err = os.MkdirAll(downloadFolderPath, os.ModePerm)
+	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("could not create download directory: %s, %v", downloadFolderPath, err)
+		return fmt.Errorf("could not create download directory: %s, %v", DownloadFolderPath, err)
 	}
 
 	/* Open File Handle */
-	filePath := fmt.Sprintf("%s/%s", downloadFolderPath, file.Name)
+	filePath := fmt.Sprintf("%s/%s", folderPath, file.Name)
 	fileHandle, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0660)
 	if err != nil {
 		return fmt.Errorf("could not open and/or create file: %s, %v", filePath, err)
@@ -144,7 +144,17 @@ func DownloadFile(driveService *drive.Service, file *File) error {
 }
 
 /* Download all Files in a Folder */
-func DownloadFilesInFolder(driveService *drive.Service, folder *Folder) {}
+func DownloadFilesInFolder(driveService *drive.Service, folder *Folder) {
+	/* Derive Folder path */
+	folderPath := fmt.Sprintf("%s/%s", DownloadFolderPath, folder.Name)
+	/* Download all the files one at a time */
+	for _, file := range folder.Files {
+		err := DownloadFile(driveService, &file, folderPath)
+		if err != nil {
+			log.Printf("Error Downloading file: %s, %v", file.Name, err)
+		}
+	}
+}
 
 func main() {
 	fmt.Println("GDOWN CLI")
@@ -199,26 +209,29 @@ func main() {
 
 	/* Fetching file details */
 	// file1.txt
-	fileId := "1NuuL9qNo5BJYnfNqN_lxBOUN0P-AociQ"
-	file, err := GetFile(driveService, fileId)
-	if err != nil {
-		log.Fatalf("Error getting File.\n%v", err)
-	}
+	// fileId := "1NuuL9qNo5BJYnfNqN_lxBOUN0P-AociQ"
+	// file, err := GetFile(driveService, fileId)
+	// if err != nil {
+	// 	log.Fatalf("Error getting File.\n%v", err)
+	// }
 
-	fmt.Printf("file: %s\n", Prettify(file))
+	// fmt.Printf("file: %s\n", Prettify(file))
 
-	err = DownloadFile(driveService, file)
-	if err != nil {
-		log.Fatalf("Error downloading file.\n%v", err)
-	}
+	// err = DownloadFile(driveService, file, downloadFolderPath)
+	// if err != nil {
+	// 	log.Fatalf("Error downloading file.\n%v", err)
+	// }
 
 	/* Fetching folder details */
 	// gdown folder
-	// folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
-	// folder, err := getFolder(driveService, folderId)
-	// if err != nil {
-	// 	log.Fatalf("Error getting Folder.\n%v", err)
-	// }
+	folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
+	folder, err := GetFolder(driveService, folderId)
+	if err != nil {
+		log.Fatalf("Error getting Folder.\n%v", err)
+	}
 
-	// fmt.Printf("folder: %s\n", Prettify(folder))
+	fmt.Printf("folder: %s\n", Prettify(folder))
+
+	/* Download all files in the folder */
+	DownloadFilesInFolder(driveService, folder)
 }

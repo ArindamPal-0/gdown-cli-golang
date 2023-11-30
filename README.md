@@ -52,7 +52,7 @@ go get -u github.com/schollz/progressbar/v3
 - [x] Fetch file details
 - [x] Fetch folder details and list of files
 - [x] Download a file
-- [ ] Download all the files in a folder
+- [x] Download all the files in a folder
 - [ ] Make it a cli application taking cli args
 - [ ] Download a folder recursively
 
