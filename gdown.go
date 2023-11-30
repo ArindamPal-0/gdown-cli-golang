@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
+	"github.com/schollz/progressbar/v3"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/drive/v3"
@@ -29,7 +31,7 @@ type Folder struct {
 	Files   []File
 }
 
-func prettify(data interface{}) string {
+func Prettify(data interface{}) string {
 	d, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		fmt.Println("❌ Could not convert data to json")
@@ -38,7 +40,8 @@ func prettify(data interface{}) string {
 	return string(d)
 }
 
-func getFile(driveService *drive.Service, fileId string) (*File, error) {
+/* Get File Details */
+func GetFile(driveService *drive.Service, fileId string) (*File, error) {
 	/* Get File details as response */
 	fileRes, err := driveService.Files.Get(fileId).Fields("id", "name", "mimeType", "size").Do()
 	if err != nil {
@@ -58,7 +61,8 @@ func getFile(driveService *drive.Service, fileId string) (*File, error) {
 	}, nil
 }
 
-func getFolder(driveService *drive.Service, folderId string) (*Folder, error) {
+/* Get Folder Details */
+func GetFolder(driveService *drive.Service, folderId string) (*Folder, error) {
 
 	/* Get Folder details as response */
 	folderRes, err := driveService.Files.Get(folderId).Fields("id", "name", "mimeType").Do()
@@ -84,7 +88,7 @@ func getFolder(driveService *drive.Service, folderId string) (*Folder, error) {
 				Size:     file.Size,
 			})
 		} else {
-			folder, err := getFolder(driveService, file.Id)
+			folder, err := GetFolder(driveService, file.Id)
 			if err != nil {
 				continue
 			}
@@ -100,6 +104,47 @@ func getFolder(driveService *drive.Service, folderId string) (*Folder, error) {
 		Files:   filesList,
 	}, nil
 }
+
+const downloadFolderPath = "downloads"
+
+/* Download a Single file */
+func DownloadFile(driveService *drive.Service, file *File) error {
+	/* Send Download File Request */
+	fileRes, err := driveService.Files.Get(file.Id).Download()
+	if err != nil {
+		return fmt.Errorf("could not download file, %v", err)
+	}
+	defer fileRes.Body.Close()
+
+	/* Create Folder */
+	err = os.MkdirAll(downloadFolderPath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("could not create download directory: %s, %v", downloadFolderPath, err)
+	}
+
+	/* Open File Handle */
+	filePath := fmt.Sprintf("%s/%s", downloadFolderPath, file.Name)
+	fileHandle, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0660)
+	if err != nil {
+		return fmt.Errorf("could not open and/or create file: %s, %v", filePath, err)
+	}
+	defer fileHandle.Close()
+
+	fmt.Printf("> %s\n", filePath)
+	/* setup progress bar */
+	bar := progressbar.DefaultBytes(
+		fileRes.ContentLength,
+		"downloading",
+	)
+
+	/* Download into opened file */
+	io.Copy(io.MultiWriter(fileHandle, bar), fileRes.Body)
+
+	return nil
+}
+
+/* Download all Files in a Folder */
+func DownloadFilesInFolder(driveService *drive.Service, folder *Folder) {}
 
 func main() {
 	fmt.Println("GDOWN CLI")
@@ -155,20 +200,25 @@ func main() {
 	/* Fetching file details */
 	// file1.txt
 	fileId := "1NuuL9qNo5BJYnfNqN_lxBOUN0P-AociQ"
-	file, err := getFile(driveService, fileId)
+	file, err := GetFile(driveService, fileId)
 	if err != nil {
 		log.Fatalf("Error getting File.\n%v", err)
 	}
 
-	fmt.Printf("file: %s\n", prettify(file))
+	fmt.Printf("file: %s\n", Prettify(file))
+
+	err = DownloadFile(driveService, file)
+	if err != nil {
+		log.Fatalf("Error downloading file.\n%v", err)
+	}
 
 	/* Fetching folder details */
 	// gdown folder
-	folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
-	folder, err := getFolder(driveService, folderId)
-	if err != nil {
-		log.Fatalf("Error getting Folder.\n%v", err)
-	}
+	// folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
+	// folder, err := getFolder(driveService, folderId)
+	// if err != nil {
+	// 	log.Fatalf("Error getting Folder.\n%v", err)
+	// }
 
-	fmt.Printf("folder: %s\n", prettify(folder))
+	// fmt.Printf("folder: %s\n", Prettify(folder))
 }

@@ -6,6 +6,12 @@ This utility can be used to download all the files automatically from a google d
 
 ## Setup
 
+### Using Libraries
+
+- [google drive api](https://developers.google.com/drive/api/quickstart/go)
+- [joho/godotenv](https://github.com/joho/godotenv)
+- [schollz/progressbar](https://github.com/schollz/progressbar)
+
 ### Google Cloud Credentials
 
 Create a google cloud project and enable *google drive api*. After that create a new *Service Account* under *Create Credentials*. From the created Service Account, generate a new *Key* and select *Key Type* as JSON. After that credentials will be downloaded in a json file. Change it's name to `credentials.json` and put it in project directory or directory from where `gdown` will be run.
@@ -36,6 +42,7 @@ go mod init github.com/arindampal-0/gdown-cli-golang
 go get google.golang.org/api/drive/v3
 go get golang.org/x/oauth3/google
 go get github.com/joho/godotenv
+go get -u github.com/schollz/progressbar/v3
 ```
 
 ## TODO
@@ -44,9 +51,9 @@ go get github.com/joho/godotenv
 - [x] Google service account authentication
 - [x] Fetch file details
 - [x] Fetch folder details and list of files
-- [ ] Download a file
-- [ ] Make it a cli application taking cli args
+- [x] Download a file
 - [ ] Download all the files in a folder
+- [ ] Make it a cli application taking cli args
 - [ ] Download a folder recursively
 
 ## Common Issues
