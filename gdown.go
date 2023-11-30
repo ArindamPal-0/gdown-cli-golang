@@ -13,6 +13,13 @@ import (
 	"google.golang.org/api/option"
 )
 
+type File struct {
+	Id       string
+	Name     string
+	MimeType string
+	Size     int64
+}
+
 func main() {
 	fmt.Println("GDOWN CLI")
 
@@ -67,12 +74,23 @@ func main() {
 	/* Fetching file details */
 	// file1.txt
 	fileId := "1NuuL9qNo5BJYnfNqN_lxBOUN0P-AociQ"
-	file, err := driveService.Files.Get(fileId).Fields("id", "name", "mimeType").Do()
+	/* Get File details as response */
+	fileRes, err := driveService.Files.Get(fileId).Fields("id", "name", "mimeType", "size").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve file: %v", err)
 	}
 
-	fmt.Printf("fileId: %+v\n", file.Id)
-	fmt.Printf("fileName: %+v\n", file.Name)
-	fmt.Printf("fileMimeType: %+v\n", file.MimeType)
+	// fmt.Printf("fileId: %+v\n", fileRes.Id)
+	// fmt.Printf("fileName: %+v\n", fileRes.Name)
+	// fmt.Printf("fileMimeType: %+v\n", fileRes.MimeType)
+	// fmt.Printf("fileSize: %+v\n", fileRes.Size)
+
+	file := File{
+		Id:       fileRes.Id,
+		Name:     fileRes.Name,
+		MimeType: fileRes.MimeType,
+		Size:     fileRes.Size,
+	}
+
+	fmt.Printf("%#v\n", file)
 }
