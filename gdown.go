@@ -38,6 +38,69 @@ func prettify(data interface{}) string {
 	return string(d)
 }
 
+func getFile(driveService *drive.Service, fileId string) (*File, error) {
+	/* Get File details as response */
+	fileRes, err := driveService.Files.Get(fileId).Fields("id", "name", "mimeType", "size").Do()
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve file: %v", err)
+	}
+
+	// fmt.Printf("fileId: %+v\n", fileRes.Id)
+	// fmt.Printf("fileName: %+v\n", fileRes.Name)
+	// fmt.Printf("fileMimeType: %+v\n", fileRes.MimeType)
+	// fmt.Printf("fileSize: %+v\n", fileRes.Size)
+
+	return &File{
+		Id:       fileRes.Id,
+		Name:     fileRes.Name,
+		MimeType: fileRes.MimeType,
+		Size:     fileRes.Size,
+	}, nil
+}
+
+func getFolder(driveService *drive.Service, folderId string) (*Folder, error) {
+
+	/* Get Folder details as response */
+	folderRes, err := driveService.Files.Get(folderId).Fields("id", "name", "mimeType").Do()
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve folder: %v", err)
+	}
+
+	/* Fetching Files List */
+	filesListRes, err := driveService.Files.List().Q(fmt.Sprintf("\"%s\" in parents", folderId)).Fields("files(id, name, mimeType, size)").OrderBy("name").Do()
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve file list: %v", err)
+	}
+
+	/* Constructing File and Folder lists */
+	filesList := []File{}
+	foldersList := []Folder{}
+	for _, file := range filesListRes.Files {
+		if file.MimeType != folderMimeType {
+			filesList = append(filesList, File{
+				Id:       file.Id,
+				Name:     file.Name,
+				MimeType: file.MimeType,
+				Size:     file.Size,
+			})
+		} else {
+			folder, err := getFolder(driveService, file.Id)
+			if err != nil {
+				continue
+			}
+			foldersList = append(foldersList, *folder)
+		}
+	}
+
+	/* Creating Parent Folder Struct Object */
+	return &Folder{
+		Id:      folderRes.Id,
+		Name:    folderRes.Name,
+		Folders: foldersList,
+		Files:   filesList,
+	}, nil
+}
+
 func main() {
 	fmt.Println("GDOWN CLI")
 
@@ -92,22 +155,9 @@ func main() {
 	/* Fetching file details */
 	// file1.txt
 	fileId := "1NuuL9qNo5BJYnfNqN_lxBOUN0P-AociQ"
-	/* Get File details as response */
-	fileRes, err := driveService.Files.Get(fileId).Fields("id", "name", "mimeType", "size").Do()
+	file, err := getFile(driveService, fileId)
 	if err != nil {
-		log.Fatalf("Unable to retrieve file: %v", err)
-	}
-
-	// fmt.Printf("fileId: %+v\n", fileRes.Id)
-	// fmt.Printf("fileName: %+v\n", fileRes.Name)
-	// fmt.Printf("fileMimeType: %+v\n", fileRes.MimeType)
-	// fmt.Printf("fileSize: %+v\n", fileRes.Size)
-
-	file := File{
-		Id:       fileRes.Id,
-		Name:     fileRes.Name,
-		MimeType: fileRes.MimeType,
-		Size:     fileRes.Size,
+		log.Fatalf("Error getting File.\n%v", err)
 	}
 
 	fmt.Printf("file: %s\n", prettify(file))
@@ -115,45 +165,9 @@ func main() {
 	/* Fetching folder details */
 	// gdown folder
 	folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
-	/* Get Folder details as response */
-	folderRes, err := driveService.Files.Get(folderId).Fields("id", "name", "mimeType").Do()
+	folder, err := getFolder(driveService, folderId)
 	if err != nil {
-		log.Fatalf("Unable to retrieve folder: %v", err)
-	}
-
-	/* Fetching Files List */
-	filesListRes, err := driveService.Files.List().Q(fmt.Sprintf("\"%s\" in parents", folderId)).Fields("files(id, name, mimeType, size)").OrderBy("name").Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve file list: %v", err)
-	}
-
-	/* Constructing File and Folder lists */
-	filesList := []File{}
-	foldersList := []Folder{}
-	for _, file := range filesListRes.Files {
-		if file.MimeType != folderMimeType {
-			filesList = append(filesList, File{
-				Id:       file.Id,
-				Name:     file.Name,
-				MimeType: file.MimeType,
-				Size:     file.Size,
-			})
-		} else {
-			foldersList = append(foldersList, Folder{
-				Id:      file.Id,
-				Name:    file.Name,
-				Folders: []Folder{},
-				Files:   []File{},
-			})
-		}
-	}
-
-	/* Creating Parent Folder Struct Object */
-	folder := Folder{
-		Id:      folderRes.Id,
-		Name:    folderRes.Name,
-		Folders: foldersList,
-		Files:   filesList,
+		log.Fatalf("Error getting Folder.\n%v", err)
 	}
 
 	fmt.Printf("folder: %s\n", prettify(folder))

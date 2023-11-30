@@ -43,7 +43,7 @@ go get github.com/joho/godotenv
 - [ ] Google client authentication
 - [x] Google service account authentication
 - [x] Fetch file details
-- [ ] Fetch folder details and list of files
+- [x] Fetch folder details and list of files
 - [ ] Download a file
 - [ ] Make it a cli application taking cli args
 - [ ] Download all the files in a folder
