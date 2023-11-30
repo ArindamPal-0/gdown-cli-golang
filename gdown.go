@@ -20,6 +20,13 @@ type File struct {
 	Size     int64
 }
 
+type Folder struct {
+	Id      string
+	Name    string
+	Folders []Folder
+	Files   []File
+}
+
 func main() {
 	fmt.Println("GDOWN CLI")
 
@@ -93,4 +100,22 @@ func main() {
 	}
 
 	fmt.Printf("%#v\n", file)
+
+	/* Fetching folder details */
+	// gdown folder
+	folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
+	/* Get Folder details as response */
+	folderRes, err := driveService.Files.Get(folderId).Fields("id", "name", "mimeType", "size").Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve folder: %v", err)
+	}
+
+	folder := Folder{
+		Id:      folderRes.Id,
+		Name:    folderRes.Name,
+		Folders: []Folder{},
+		Files:   []File{},
+	}
+
+	fmt.Printf("%#v\n", folder)
 }
