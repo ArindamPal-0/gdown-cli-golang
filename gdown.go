@@ -20,11 +20,22 @@ type File struct {
 	Size     int64
 }
 
+const folderMimeType = "application/vnd.google-apps.folder"
+
 type Folder struct {
 	Id      string
 	Name    string
 	Folders []Folder
 	Files   []File
+}
+
+func prettify(data interface{}) string {
+	d, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Println("❌ Could not convert data to json")
+		return ""
+	}
+	return string(d)
 }
 
 func main() {
@@ -99,23 +110,40 @@ func main() {
 		Size:     fileRes.Size,
 	}
 
-	fmt.Printf("%#v\n", file)
+	fmt.Printf("file: %s\n", prettify(file))
 
 	/* Fetching folder details */
 	// gdown folder
 	folderId := "1SVHxav6Y5LoYbdgfx2MSsdYlT74RTjej"
 	/* Get Folder details as response */
-	folderRes, err := driveService.Files.Get(folderId).Fields("id", "name", "mimeType", "size").Do()
+	folderRes, err := driveService.Files.Get(folderId).Fields("id", "name", "mimeType").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve folder: %v", err)
+	}
+
+	filesListRes, err := driveService.Files.List().Q(fmt.Sprintf("\"%s\" in parents", folderId)).Fields("files(id, name, mimeType, size)").OrderBy("name").Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve file list: %v", err)
+	}
+
+	filesList := []File{}
+	for _, file := range filesListRes.Files {
+		if file.MimeType != folderMimeType {
+			filesList = append(filesList, File{
+				Id:       file.Id,
+				Name:     file.Name,
+				MimeType: file.MimeType,
+				Size:     file.Size,
+			})
+		}
 	}
 
 	folder := Folder{
 		Id:      folderRes.Id,
 		Name:    folderRes.Name,
 		Folders: []Folder{},
-		Files:   []File{},
+		Files:   filesList,
 	}
 
-	fmt.Printf("%#v\n", folder)
+	fmt.Printf("folder: %s\n", prettify(folder))
 }
