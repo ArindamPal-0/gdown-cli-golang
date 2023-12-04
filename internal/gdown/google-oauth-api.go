@@ -4,13 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"path"
 
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
 )
+
+var configFolderPath string = (func() string {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatalf("Could not get User Config Directory.\n%v", err)
+	}
+
+	return path.Join(configDir, "gdown")
+})()
 
 /* Drive Client using Service Account */
 func NewDriveClientUsingServiceAccount() (*drive.Service, error) {
@@ -23,9 +34,10 @@ func NewDriveClientUsingServiceAccount() (*drive.Service, error) {
 	}
 
 	/* Reading credentials.json file */
-	content, err := os.ReadFile("credentials.json")
+	var credentialsPath string = path.Join(configFolderPath, "service-account", "credentials.json")
+	content, err := os.ReadFile(credentialsPath)
 	if err != nil {
-		return nil, fmt.Errorf("could not read file credentials.json.\n%v", err)
+		return nil, fmt.Errorf("could not read file %v.\n%v", credentialsPath, err)
 	}
 
 	/* Converting json to Credentials */

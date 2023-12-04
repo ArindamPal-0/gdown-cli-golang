@@ -20,6 +20,23 @@ OR
 go install https://github.com/ArindamPal-0/gdown-cli-golang/cmd/gdown
 ```
 
+### Configuration
+
+After installation, configuration needs to be done.
+
+Before that you need to download the `credentials.json` file required.
+
+First create a google cloud project and enable *google drive api*. After that create a new *Service Account* under *Create Credentials*. From the created Service Account, generate a new *Key* and select *Key Type* as JSON. After that credentials will be downloaded in a json file. Change it's name to `credentials.json` and put it in project directory or directory from where `gdown` will be run.
+
+Now run the following command:
+
+```shell
+$  gdown configure
+Put the Service Account credentials.json file in the following directory C:\Users\<Username>\AppData\Roaming/gdown/service-account
+```
+
+And then copy the Service Account `credentials.json` file downloaded (and renamed), to specified directory. (The above example is shown for Windows, similar copy needs to be done on other platforms)
+
 ## Usage
 
 ### Prerequisite
@@ -37,6 +54,7 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
+  configure   Configure gdown, creates gdown config directory and more...
   download    Download the item
   help        Help about any command
   list        List details if the item
@@ -45,6 +63,19 @@ Flags:
   -h, --help   help for gdown
 
 Use "gdown [command] --help" for more information about a command.
+```
+
+Help for `configure` subcommand
+
+```shell
+$ gdown configure --help
+Configure gdown, creates gdown config directory and more...
+
+Usage:
+  gdown configure [flags]
+
+Flags:
+  -h, --help   help for configure
 ```
 
 Help for `list` subcommand
@@ -74,6 +105,13 @@ Flags:
   -l, --list   also list details of the item
 ```
 
+### Configure gdown
+
+```shell
+$  gdown configure
+Put the Service Account credentials.json file in the following directory C:\Users\<Username></Username>\AppData\Roaming/gdown/service-account
+```
+
 ### List file/folder Details
 
 ```shell
@@ -91,6 +129,8 @@ Size: 16
 ```
 
 ### Download File/Folder
+
+The files and folders are download in `$HOME/Downloads` directory. (For now download directory can not be changed/configured)
 
 ```shell
 gdown download <id>
@@ -124,7 +164,9 @@ downloading 100% |████████████████████�
 
 ## Setup
 
-### Using Libraries
+### Libraries Used
+
+This project uses the following libraries
 
 - [google drive api](https://developers.google.com/drive/api/quickstart/go)
 - [joho/godotenv](https://github.com/joho/godotenv)
@@ -170,25 +212,31 @@ List Details of File/Folder
 Running the application, show help message
 
 ```shell
-go run gdown.go
+go run ./cmd/gdown
+```
+
+OR
+
+```shell
+go run cmd/gdown/main.go
 ```
 
 List Details of File/Folder
 
 ```shell
-go run gdown.go list <id>
+go run ./cmd/gdown list <id>
 ```
 
 Download File/Folder
 
 ```shell
-go run gdown.go download <id>
+go run ./cmd/gdown download <id>
 ```
 
 List Details and Download File/Folder
 
 ```shell
-go run gdown.go download --list <id>
+go run ./cmd/gdown download --list <id>
 ```
 
 ### Scratch setup

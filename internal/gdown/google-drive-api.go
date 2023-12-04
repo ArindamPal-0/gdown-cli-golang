@@ -3,6 +3,7 @@ package gdown
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 
@@ -178,7 +179,14 @@ func ListFolderDetails(folder *Folder) {
 	}
 }
 
-var downloadFolderPath string = "downloads"
+var downloadFolderPath string = (func() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalf("Could not get User Home Directory.\n%v", err)
+	}
+
+	return path.Join(homeDir, "Downloads")
+})()
 
 /* Set download folder path */
 func SetDownloadFolderPath(path string) {
