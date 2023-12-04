@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/arindampal-0/gdown-cli-golang/internal/gdown"
+	"github.com/ArindamPal-0/gdown-cli-golang/internal/gdown"
 	"github.com/spf13/cobra"
 )
 
