@@ -25,14 +25,14 @@ func NewDriveClientUsingServiceAccount() (*drive.Service, error) {
 	/* Reading credentials.json file */
 	content, err := os.ReadFile("credentials.json")
 	if err != nil {
-		return nil, fmt.Errorf("could not read file credentials.json, %v", err)
+		return nil, fmt.Errorf("could not read file credentials.json.\n%v", err)
 	}
 
 	/* Converting json to Credentials */
 	var cred Credential
 	err = json.Unmarshal(content, &cred)
 	if err != nil {
-		return nil, fmt.Errorf("could not convert json to Credentials interface, %v", err)
+		return nil, fmt.Errorf("could not convert json to Credentials interface.\n%v", err)
 	}
 
 	/* Creating JWT Config object */
@@ -61,7 +61,7 @@ func NewDriveClientUsingServiceAccount() (*drive.Service, error) {
 	// ))
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve Drive client, %v", err)
+		return nil, fmt.Errorf("unable to retrieve Drive client.\n%v", err)
 	}
 
 	return driveClient, nil
