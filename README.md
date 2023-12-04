@@ -4,6 +4,22 @@ Google DOWNloader
 
 This utility can be used to download all the files automatically from a google drive folder one at a time (alternative to manually clicking download on each file on google drive web UI).
 
+## Installation
+
+Install after project cloning
+
+```shell
+git clone https://github.com/ArindamPal-0/gdown-cli-golang
+cd gdown-cli-golang
+go install ./cmd/gdown
+```
+
+OR
+
+```shell
+go install https://github.com/ArindamPal-0/gdown-cli-golang/cmd/gdown
+```
+
 ## Usage
 
 ### Prerequisite
@@ -126,13 +142,13 @@ Create a google cloud project and enable *google drive api*. After that create a
 > Build (Linux)
 
 ```shell
-go build -o build/gdown
+go build -o build/gdown ./cmd/gdown
 ```
 
 > Build (Windows)
 
 ```shell
-go build -o build/gdown.exe
+go build -o build\gdown.exe .\cmd\gdown
 ```
 
 #### Run
